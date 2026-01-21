@@ -1,0 +1,21 @@
+# Python
+ml_classifier.egg-info
+__pycache__
+
+# Data
+data/**/*.csv
+
+# Artifacts
+artifacts/*.joblib
+
+# Models
+models/*.keras
+
+# Metrics 
+metrics/*.json
+
+# MLflow
+mlruns
+
+# Project
+.env

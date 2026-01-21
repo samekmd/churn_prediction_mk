@@ -1,0 +1,10 @@
+train:
+  colsample_bytree: 1
+  learning_rate: 0.2 
+  max_depth: 4 
+  n_estimators: 50
+
+
+preprocess_data:
+  test_size: 0.2
+  random_seed: 42

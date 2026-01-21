@@ -6,7 +6,7 @@ authors = [
     {name = "samek_md",email = "samuelalkmc@gmail.com"}
 ]
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.12,<3.13"
 dependencies = [
     "notebook (>=7.5.0,<8.0.0)",
     "scikit-learn (>=1.7.2,<2.0.0)",
@@ -16,7 +16,15 @@ dependencies = [
     "seaborn (>=0.13.2,<0.14.0)",
     "plotly (>=6.5.0,<7.0.0)",
     "imbalanced-learn (>=0.14.0,<0.15.0)",
-    "xgboost (>=3.1.3,<4.0.0)"
+    "xgboost (>=3.1.3,<4.0.0)",
+    "fastapi (>=0.128.0,<0.129.0)",
+    "unicorn (>=2.1.4,<3.0.0)",
+    "python-dotenv (>=1.2.1,<2.0.0)",
+    "mlflow (>=3.8.1,<4.0.0)",
+    "dvc (>=3.66.1,<4.0.0)",
+    "pyyaml (>=6.0.3,<7.0.0)",
+    "dagshub==0.5.9",
+    "apache-airflow==2.10.5"
 ]
 
 [tool.poetry]
