@@ -3,6 +3,7 @@ import logging
 import joblib
 import pandas as pd 
 from pathlib import Path
+import churn_prediction_mk
 
 logger = logging.getLogger("app.main")
 
@@ -15,7 +16,7 @@ class ModelService:
         logger.info("Loading artifacts from local project folder")
         
         # Base dir 
-        base_dir = Path(__file__).resolve().parents[2]
+        base_dir = Path(churn_prediction_mk.__file__).resolve().parents[2]
         
         # define base paths 
         artifacts_dir = base_dir / "artifacts"
@@ -34,6 +35,7 @@ class ModelService:
         self.model = joblib.load(model_path)
         
         print(type(self.target_encoder))
+        print(type(self.features_encoder))
         
         logger.info("Successfully loaded all artifacts")
         

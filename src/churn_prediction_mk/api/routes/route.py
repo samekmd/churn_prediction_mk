@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, File, UploadFile
 import pandas as pd
-from utils.prediction import ModelService 
+from ..utils.prediction import ModelService 
 import io
 
 predict_route = APIRouter(prefix='/predict', tags=['Predictions'])
@@ -17,7 +17,7 @@ async def sample_prediction(file: UploadFile = File(...) ):
         data = pd.read_csv(io.StringIO(content.decode("utf-8")))
         
         if 'gender' in data.columns:
-           data = data.drop(columns=['gender'], inplace=True)
+           data = data.drop(columns=['gender'])
        
         predicts = service.predict(data)
         

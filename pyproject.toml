@@ -1,7 +1,7 @@
 [project]
 name = "churn_prediction_mk"
 version = "0.1.0"
-description = ""
+description = "Churn Prediction Machine Learning Project"
 authors = [
     {name = "samek_md", email = "samuelalkmc@gmail.com"}
 ]
@@ -24,18 +24,18 @@ dependencies = [
     "dvc>=3.66.1,<4.0.0",
     "pyyaml>=6.0.3,<7.0.0",
     "dagshub==0.5.9",
-    "apache-airflow==2.10.5",
     "python-multipart>=0.0.22,<0.0.23"
 ]
 
-[tool.setuptools.packages.find]
-where = ["."]
-
-[tool.poetry]
-packages = [
-    { include = "churn_prediction_mk", from = "src" }
-]
-
 [build-system]
-requires = ["poetry-core>=2.0.0,<3.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["setuptools>=68.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+# Configura quais pacotes devem ser incluídos
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["churn_prediction_mk*"]
+

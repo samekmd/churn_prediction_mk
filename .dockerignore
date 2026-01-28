@@ -17,8 +17,8 @@ metrics/*.json
 mlruns
 
 # Project
-artifacts
-models
+# artifacts
+# models
 
 # Notebook
 notebook.ipynb
