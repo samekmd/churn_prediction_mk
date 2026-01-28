@@ -8,3 +8,27 @@ train:
 preprocess_data:
   test_size: 0.2
   random_seed: 42
+
+columns_process:
+  cat_cols: [
+    'SeniorCitizen',
+    'Partner',
+    'Dependents',
+    'PhoneService',
+    'MultipleLines',
+    'InternetService',
+    'OnlineSecurity',
+    'OnlineBackup',
+    'DeviceProtection',
+    'TechSupport',
+    'StreamingTV',
+    'StreamingMovies',
+    'Contract',
+    'PaperlessBilling',
+    'PaymentMethod',
+  ]
+
+  num_cols: [
+    'MonthlyCharges',
+    'TotalCharges'
+  ]

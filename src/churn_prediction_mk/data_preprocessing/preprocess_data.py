@@ -5,6 +5,7 @@ import yaml
 import joblib
 import pandas as pd
 from sklearn.model_selection import train_test_split
+import numpy as np
 
 
 logger = logging.getLogger("src.data_preprocessing.preprocess_data")
@@ -17,9 +18,9 @@ def load_data() -> pd.DataFrame:
     :rtype: DataFrame
     """
     
-    data_path = "/home/samuel-machado/churn_prediction_mk/churn/WA_Fn-UseC_-Telco-Customer-Churn.csv"
+    data_path = "data/raw/churn.csv"
     logger.info(f"Loading raw data from {data_path}")
-    data = pd.read_csv(data_path, index_col='customerID')
+    data = pd.read_csv(data_path)
     return data
 
 
@@ -35,7 +36,7 @@ def load_params() -> dict[str, float | int]:
     return params["preprocess_data"]
 
 
-def split_data(data: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
+def split_data(data: pd.DataFrame) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """
     Split data into train and test sets using parameters from params.yaml
     
@@ -48,14 +49,21 @@ def split_data(data: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
     
     params = load_params()
     logger.info("Splitting into train and test sets...")
-    train_data, test_data = train_test_split(
-        data, test_size=params["test_size"],
-        random_state=params["random_seed"]
+    X = data.drop(columns=['Churn'])
+    y = data['Churn']
+    X_train, X_test, y_train, y_test  = train_test_split(
+        X,y,
+        test_size=params["test_size"],
+        random_state=params["random_seed"],
+        stratify=y
     )
     
-    return train_data, test_data
+    return  X_train, X_test, y_train, y_test
     
-def save_artifacts(train_data: pd.DataFrame, test_data: pd.DataFrame) -> None:
+def save_artifacts(X_train: np.ndarray, 
+                   X_test: np.ndarray,
+                   y_train: np.ndarray,
+                   y_test: np.ndarray) -> None:
     """
     Save processed data and preprocessing artifacts
     
@@ -68,18 +76,27 @@ def save_artifacts(train_data: pd.DataFrame, test_data: pd.DataFrame) -> None:
     data_dir = "data/preprocessed"
     logger.info(f"Saving processed data to {data_dir}")
     
-    train_path = os.path.join(data_dir, "train_preprocessed.csv")
-    test_path = os.path.join(data_dir, "test_preprocessed.csv")
+    X_train_data = pd.DataFrame(X_train)
+    X_test_data = pd.DataFrame(X_test)
+    y_train_data = pd.DataFrame(y_train)
+    y_test_data = pd.DataFrame(y_test)
     
-    train_data.to_csv(train_path, index=False)
-    test_data.to_csv(test_path, index=False)
+    X_train_path = os.path.join(data_dir, "X_train.csv")
+    X_test_path = os.path.join(data_dir, "X_test.csv")
+    y_train_path = os.path.join(data_dir, "y_train.csv")
+    y_test_path = os.path.join(data_dir, "y_test.csv")
+    
+    X_train_data.to_csv(X_train_path, index=False)
+    X_test_data.to_csv(X_test_path, index=False)
+    y_train_data.to_csv(y_train_path, index=False)
+    y_test_data.to_csv(y_test_path, index=False)
     
     
 def main() -> None:
     """Main function to orchestrate the preprocessing pipeline."""
     raw_data = load_data()
-    train_data, test_data = split_data(raw_data)
-    save_artifacts(train_data, test_data)
+    X_train, X_test, y_train, y_test = split_data(raw_data)
+    save_artifacts(X_train, X_test, y_train, y_test)
     logger.info("Data preprocessing completed")
     
 if __name__ == "__main__":

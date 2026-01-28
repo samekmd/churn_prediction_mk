@@ -19,3 +19,9 @@ mlruns
 # Project
 artifacts
 models
+
+# Notebook
+notebook.ipynb
+
+# scripts
+*.sh
