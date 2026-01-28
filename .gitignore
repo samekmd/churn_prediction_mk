@@ -9,7 +9,7 @@ data/**/*.csv
 artifacts/*.joblib
 
 # Models
-models/*.keras
+models/*.xgboost
 
 # Metrics 
 metrics/*.json

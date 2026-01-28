@@ -1,0 +1,140 @@
+schema: '2.0'
+stages:
+  preprocess_data:
+    cmd: python -m src.churn_prediction_mk.data_preprocessing.preprocess_data
+    deps:
+    - path: data/raw/churn.csv
+      hash: md5
+      md5: ccb4f63215eebfc6a97421b93c3fe3a0
+      size: 894592
+    - path: src/churn_prediction_mk/data_preprocessing/preprocess_data.py
+      hash: md5
+      md5: 12dd67d5b7e83b355fc8f658391efc9d
+      size: 2940
+    params:
+      params.yaml:
+        preprocess_data.random_seed: 42
+        preprocess_data.test_size: 0.2
+    outs:
+    - path: data/preprocessed/X_test.csv
+      hash: md5
+      md5: 25a23d5adbdea1e9a974ef46d10efebc
+      size: 174750
+    - path: data/preprocessed/X_train.csv
+      hash: md5
+      md5: cdf5484cdd39678585ac1e781e2515de
+      size: 697081
+    - path: data/preprocessed/y_test.csv
+      hash: md5
+      md5: 4eea28e60b3a4a5c3869f5bd38a07623
+      size: 4607
+    - path: data/preprocessed/y_train.csv
+      hash: md5
+      md5: bb96c63dbc7b1056fd306265e978a69e
+      size: 18403
+  engineer_features:
+    cmd: python -m src.churn_prediction_mk.feature_engineering.engineer_features
+    deps:
+    - path: data/preprocessed/X_test.csv
+      hash: md5
+      md5: 25a23d5adbdea1e9a974ef46d10efebc
+      size: 174750
+    - path: data/preprocessed/X_train.csv
+      hash: md5
+      md5: cdf5484cdd39678585ac1e781e2515de
+      size: 697081
+    - path: data/preprocessed/y_test.csv
+      hash: md5
+      md5: 4eea28e60b3a4a5c3869f5bd38a07623
+      size: 4607
+    - path: data/preprocessed/y_train.csv
+      hash: md5
+      md5: bb96c63dbc7b1056fd306265e978a69e
+      size: 18403
+    - path: src/churn_prediction_mk/feature_engineering/engineer_features.py
+      hash: md5
+      md5: 3e8295a5e08a26c8cfecfb97e1f29bbd
+      size: 5255
+    outs:
+    - path: artifacts/[features]_ohe.joblib
+      hash: md5
+      md5: 4e46afc7d1a054806f1eebfaa30d3601
+      size: 6275
+    - path: artifacts/[target]_label.joblib
+      hash: md5
+      md5: f6089750efcfb527ca0b067c101cba55
+      size: 484
+    - path: data/processed/X_test_processed.csv
+      hash: md5
+      md5: ff28036e280f0979ec448a8276890802
+      size: 286462
+    - path: data/processed/X_train_processed.csv
+      hash: md5
+      md5: 0c957ee4ffcbbd0e7aefd82dc4e09153
+      size: 1144823
+    - path: data/processed/y_test_processed.csv
+      hash: md5
+      md5: f0270f5ed4fa7449598f897bb4eb34c2
+      size: 2824
+    - path: data/processed/y_train_processed.csv
+      hash: md5
+      md5: c9b61327d9c9b8b3d1a988e0ba0d7f3d
+      size: 11274
+  train:
+    cmd: python -m src.churn_prediction_mk.model_training.train_model
+    deps:
+    - path: data/processed/X_train_processed.csv
+      hash: md5
+      md5: 0c957ee4ffcbbd0e7aefd82dc4e09153
+      size: 1144823
+    - path: data/processed/y_train_processed.csv
+      hash: md5
+      md5: c9b61327d9c9b8b3d1a988e0ba0d7f3d
+      size: 11274
+    - path: src/churn_prediction_mk/model_training/train_model.py
+      hash: md5
+      md5: dd9e873655a62b77d1577c0d3789e1c9
+      size: 3810
+    params:
+      params.yaml:
+        train.colsample_bytree: 1
+        train.learning_rate: 0.2
+        train.max_depth: 4
+        train.n_estimators: 50
+    outs:
+    - path: metrics/training.json
+      hash: md5
+      md5: 22a93b51e2797fb661abf312548b42be
+      size: 248
+    - path: models/model.xgboost
+      hash: md5
+      md5: 725786c9546aababebb6e13dbe9d69c4
+      size: 87530
+  evaluate:
+    cmd: python -m src.churn_prediction_mk.model_evaluation.evaluate_model
+    deps:
+    - path: artifacts/[features]_ohe.joblib
+      hash: md5
+      md5: 4e46afc7d1a054806f1eebfaa30d3601
+      size: 6275
+    - path: data/processed/X_test_processed.csv
+      hash: md5
+      md5: ff28036e280f0979ec448a8276890802
+      size: 286462
+    - path: data/processed/y_test_processed.csv
+      hash: md5
+      md5: f0270f5ed4fa7449598f897bb4eb34c2
+      size: 2824
+    - path: models/model.xgboost
+      hash: md5
+      md5: 725786c9546aababebb6e13dbe9d69c4
+      size: 87530
+    - path: src/churn_prediction_mk/model_evaluation/evaluate_model.py
+      hash: md5
+      md5: 7cb2a533a337ff89de4d3deade24dc66
+      size: 2160
+    outs:
+    - path: metrics/evaluation.json
+      hash: md5
+      md5: fc366c768a0c4c047107385f3fdddc13
+      size: 803

@@ -1,0 +1,59 @@
+stages:
+
+  preprocess_data:
+    cmd: python -m src.churn_prediction_mk.data_preprocessing.preprocess_data
+    deps:
+      - src/churn_prediction_mk/data_preprocessing/preprocess_data.py
+      - data/raw/churn.csv
+    outs:
+      - data/preprocessed/X_test.csv
+      - data/preprocessed/X_train.csv
+      - data/preprocessed/y_test.csv
+      - data/preprocessed/y_train.csv
+    params:
+      - preprocess_data.test_size
+      - preprocess_data.random_seed
+
+  engineer_features:
+    cmd: python -m src.churn_prediction_mk.feature_engineering.engineer_features
+    deps:
+      - src/churn_prediction_mk/feature_engineering/engineer_features.py
+      - data/preprocessed/X_test.csv
+      - data/preprocessed/X_train.csv
+      - data/preprocessed/y_test.csv
+      - data/preprocessed/y_train.csv
+    outs:
+      - data/processed/X_test_processed.csv
+      - data/processed/X_train_processed.csv
+      - data/processed/y_test_processed.csv
+      - data/processed/y_train_processed.csv
+      - artifacts/[features]_ohe.joblib
+      - artifacts/[target]_label.joblib
+      
+
+  train:
+    cmd: python -m src.churn_prediction_mk.model_training.train_model
+    deps:
+      - src/churn_prediction_mk/model_training/train_model.py
+      - data/processed/X_train_processed.csv
+      - data/processed/y_train_processed.csv
+    outs:
+      - models/model.xgboost
+    metrics:
+      - metrics/training.json
+    params:
+      - train.colsample_bytree
+      - train.learning_rate 
+      - train.max_depth
+      - train.n_estimators
+
+  evaluate:
+    cmd: python -m src.churn_prediction_mk.model_evaluation.evaluate_model
+    deps:
+      - src/churn_prediction_mk/model_evaluation/evaluate_model.py
+      - models/model.xgboost
+      - artifacts/[features]_ohe.joblib
+      - data/processed/X_test_processed.csv
+      - data/processed/y_test_processed.csv
+    metrics:
+      - metrics/evaluation.json

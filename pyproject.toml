@@ -1,6 +1,6 @@
 [project]
 name = "churn_prediction_mk"
-version = "0.1.0"
+version = "0.2.0"
 description = "Churn Prediction Machine Learning Project"
 authors = [
     {name = "samek_md", email = "samuelalkmc@gmail.com"}
