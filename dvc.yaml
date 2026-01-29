@@ -1,4 +1,8 @@
 stages:
+  # load_data:
+  #   always_changed: true
+  #   deps:
+  #     - data/raw/raw.csv
 
   preprocess_data:
     cmd: python -m src.churn_prediction_mk.data_preprocessing.preprocess_data

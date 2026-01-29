@@ -1,7 +1,7 @@
 train:
   colsample_bytree: 1
-  learning_rate: 0.2 
-  max_depth: 4 
+  learning_rate: 0.2
+  max_depth: 8
   n_estimators: 50
 
 
@@ -10,25 +10,23 @@ preprocess_data:
   random_seed: 42
 
 columns_process:
-  cat_cols: [
-    'SeniorCitizen',
-    'Partner',
-    'Dependents',
-    'PhoneService',
-    'MultipleLines',
-    'InternetService',
-    'OnlineSecurity',
-    'OnlineBackup',
-    'DeviceProtection',
-    'TechSupport',
-    'StreamingTV',
-    'StreamingMovies',
-    'Contract',
-    'PaperlessBilling',
-    'PaymentMethod',
-  ]
+  cat_cols:
+  - SeniorCitizen
+  - Partner
+  - Dependents
+  - PhoneService
+  - MultipleLines
+  - InternetService
+  - OnlineSecurity
+  - OnlineBackup
+  - DeviceProtection
+  - TechSupport
+  - StreamingTV
+  - StreamingMovies
+  - Contract
+  - PaperlessBilling
+  - PaymentMethod
 
-  num_cols: [
-    'MonthlyCharges',
-    'TotalCharges'
-  ]
+  num_cols:
+  - MonthlyCharges
+  - TotalCharges
