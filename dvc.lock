@@ -93,23 +93,23 @@ stages:
       size: 11274
     - path: src/churn_prediction_mk/model_training/train_model.py
       hash: md5
-      md5: dd9e873655a62b77d1577c0d3789e1c9
-      size: 3810
+      md5: 79571b85d9563ace3a4d3ac5f9da48d5
+      size: 4472
     params:
       params.yaml:
         train.colsample_bytree: 1
         train.learning_rate: 0.2
-        train.max_depth: 5
+        train.max_depth: 8
         train.n_estimators: 50
     outs:
     - path: metrics/training.json
       hash: md5
-      md5: e89627b22bfb2a2a28f95a4970a7162b
+      md5: 45a1517e97833d70b3c5da373bed91d9
       size: 248
     - path: models/model.xgboost
       hash: md5
-      md5: 3876c81988a908758702535032690dfb
-      size: 121870
+      md5: 4a3604b5d601434cf84763634f69374b
+      size: 312765
   evaluate:
     cmd: python -m src.churn_prediction_mk.model_evaluation.evaluate_model
     deps:
@@ -127,14 +127,14 @@ stages:
       size: 2824
     - path: models/model.xgboost
       hash: md5
-      md5: 3876c81988a908758702535032690dfb
-      size: 121870
+      md5: 4a3604b5d601434cf84763634f69374b
+      size: 312765
     - path: src/churn_prediction_mk/model_evaluation/evaluate_model.py
       hash: md5
-      md5: 7cb2a533a337ff89de4d3deade24dc66
-      size: 2160
+      md5: 6a8d78a35c45601372ee3cdfd4aadc0b
+      size: 3110
     outs:
     - path: metrics/evaluation.json
       hash: md5
-      md5: a589bcbe01e5b4e067ff39a69a5de2a4
-      size: 802
+      md5: 4569161b9aac7fb78aa810384aa09441
+      size: 804

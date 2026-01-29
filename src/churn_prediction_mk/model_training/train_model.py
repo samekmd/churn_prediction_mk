@@ -8,6 +8,7 @@ import pandas as pd
 import yaml
 from xgboost import XGBClassifier
 from pathlib import Path
+import mlflow
 
 logger = logging.getLogger("src.model_training.train_model")
 
@@ -76,44 +77,60 @@ def create_train_model(X_train_data: pd.DataFrame,
     Returns:
         XGBClassifier: Model trained
     """
-    # Creating the model
-    model = XGBClassifier(
-        objective='binary:logistic',
-        colsample_bytree=params['colsample_bytree'],
-        learning_rate=params['learning_rate'],
-        max_depth=params['max_depth'],
-        n_estimators=params['n_estimators'],
-        eval_metric=["logloss", "auc", "error"]
-    )
-    
-    # Training the model
-    model.fit(X_train_data, 
-              y_train_data,
-              eval_set=[(X_train_data, y_train_data), (X_test_data, y_test_data)]
-              )
-    
-    # Saving training metrics 
-    results = model.evals_result()
-    
-    metrics = {
-        'train_logloss': float(results['validation_0']['logloss'][-1]),
-        'val_logloss': float(results['validation_1']['logloss'][-1]),
-        'train_auc': float(results['validation_0']['auc'][-1]),
-        'val_auc': float(results['validation_1']['auc'][-1]),
-        'train_error': float(results['validation_0']['error'][-1]),
-        'val_error': float(results['validation_1']['error'][-1]),
-        'n_estimators_used': len(results['validation_0']['logloss'])
-    }
-    
     base_dir = Path(__file__).resolve().parents[3]
     
-    metrics_path = base_dir / "metrics/training.json"
+    # Set up mlflow experiment
+    mlflow.set_tracking_uri(f"file://{base_dir}/mlruns")
+    mlflow.set_experiment("ml_classification")
     
-    with open(metrics_path, 'w') as f:
-        json.dump(metrics, f, indent=2)
+    # Set up xgboost autolog
+    mlflow.xgboost.autolog()
     
-    # Saving the model
-    save_training_artifacts(model)
+    with mlflow.start_run():
+        # Log params to mlflow
+        mlflow.log_params(params)
+        
+        # Log preprocessing artifacts
+        mlflow.log_artifact(base_dir / "artifacts/[features]_ohe.joblib")
+        mlflow.log_artifact(base_dir / "artifacts/[target]_label.joblib")
+        
+        # Creating the model
+        model = XGBClassifier(
+            objective='binary:logistic',
+            colsample_bytree=params['colsample_bytree'],
+            learning_rate=params['learning_rate'],
+            max_depth=params['max_depth'],
+            n_estimators=params['n_estimators'],
+            eval_metric=["logloss", "auc", "error"]
+        )
+        
+        # Training the model
+        model.fit(X_train_data, 
+                y_train_data,
+                eval_set=[(X_train_data, y_train_data), (X_test_data, y_test_data)]
+                )
+        
+        # Saving training metrics 
+        results = model.evals_result()
+        
+        metrics = {
+            'train_logloss': float(results['validation_0']['logloss'][-1]),
+            'val_logloss': float(results['validation_1']['logloss'][-1]),
+            'train_auc': float(results['validation_0']['auc'][-1]),
+            'val_auc': float(results['validation_1']['auc'][-1]),
+            'train_error': float(results['validation_0']['error'][-1]),
+            'val_error': float(results['validation_1']['error'][-1]),
+            'n_estimators_used': len(results['validation_0']['logloss'])
+        }
+        
+        
+        metrics_path = base_dir / "metrics/training.json"
+        
+        with open(metrics_path, 'w') as f:
+            json.dump(metrics, f, indent=2)
+        
+        # Saving the model
+        save_training_artifacts(model)
     
     
     
