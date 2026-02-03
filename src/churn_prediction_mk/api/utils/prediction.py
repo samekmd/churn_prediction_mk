@@ -1,41 +1,79 @@
 import logging
+import os
 
 import joblib
 import pandas as pd 
 from pathlib import Path
-import churn_prediction_mk
+import mlflow
+from mlflow.tracking import MlflowClient
 
 logger = logging.getLogger("app.main")
 
 class ModelService:
     def __init__(self) -> None:
+        mlflow_uri = os.getenv("MLFLOW_TRACKING_URI")
+        print(f"MlFLow URI: {mlflow_uri}")
         self._load_artifacts()
         
+        
+    
+        
+    
+        
     def _load_artifacts(self) -> None:
-        """Load all artifacts from the local project folder"""
-        logger.info("Loading artifacts from local project folder")
+        """Load the registered model from MLflow Model Registry related artifacts from its run"""
+       
+        # Get run id from model version metadata 
+        client = MlflowClient()
+        model_version = client.get_latest_versions(
+            name="model",
+            stages=["None", "Production"]
+        )
+           
+        print("\n===== MODEL REGISTRY DEBUG =====")
+        for v in model_version:
+                print("name:", v.name)
+                print("version:", v.version)
+                print("run_id:", v.run_id)
+                print("source:", repr(v.source))
+                print("status:", v.status)
+                print("--------------------------------")
         
-        # Base dir 
-        base_dir = Path(churn_prediction_mk.__file__).resolve().parents[2]
+        # Load model from registry
+        logger.info("Loading registered model from MLFlow Model Registry")
+        self.model = mlflow.xgboost.load_model("models:/model/latest")
         
-        # define base paths 
-        artifacts_dir = base_dir / "artifacts"
-        models_dir = base_dir / "models"
+        run_id = model_version.run_id
+        run = client.get_run(run_id)
         
-        # Define paths to the preprocesing artifacts
-        features_imputer_path = artifacts_dir / "[features]_ohe.joblib"
-        target_encoder = artifacts_dir / "[target]_label.joblib"
+        print("\n===== RUN DEBUG =====")
+        print("run_id:", run.info.run_id)
+        print("artifact_uri:", run.info.artifact_uri)
+        print("lifecycle_stage:", run.info.lifecycle_stage)
+            
+        # Load related artifacts 
+        logger.info(f"Loading artifacts from run {run_id}")
         
-        # Define path to the model file
-        model_path = models_dir / "model.xgboost"
-         
-        # Loading all required artifacts 
-        self.features_encoder = joblib.load(features_imputer_path)
-        self.target_encoder = joblib.load(target_encoder)
-        self.model = joblib.load(model_path)
+        print("\n===== ARTIFACT TREE =====")
+
+        def list_artifacts(path=""):
+            artifacts = client.list_artifacts(run_id, path)
+            for a in artifacts:
+                print(f"{a.path} (is_dir={a.is_dir})")
+                if a.is_dir:
+                    list_artifacts(a.path)
+                    
+        list_artifacts()
         
-        print(type(self.target_encoder))
-        print(type(self.features_encoder))
+        artifacts_dir = mlflow.artifacts.download_artifacts(run_id=run_id, artifact_path="encoders")
+        
+        print(f"Pasta dos artefatos: {artifacts_dir}")
+        
+        ohe_path = Path(artifacts_dir) / "[features]_ohe.joblib"
+        label_path = Path(artifacts_dir) / "[target]_label.joblib"
+        
+        self.features_encoder = joblib.load(ohe_path)
+        self.target_encoder = joblib.load(label_path)
         
         logger.info("Successfully loaded all artifacts")
         

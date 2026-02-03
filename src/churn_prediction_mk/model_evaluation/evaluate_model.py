@@ -10,6 +10,7 @@ import os
 import mlflow
 
 
+
 logger = logging.getLogger("src.model_evaluation.evaluate_model")
 
 def load_model() -> XGBClassifier:
@@ -58,8 +59,10 @@ def evaluate_model(
     base_dir = Path(__file__).resolve().parents[3]
     
     # Set up mlflow experiment
-    mlflow.set_tracking_uri(f"file://{base_dir}/mlruns")
-    mlflow.set_experiment("ml_classification")
+    # mlflow.set_tracking_uri(f"file://{base_dir}/mlruns")
+    mlflow.set_tracking_uri(os.getenv("MLFLOW_TRACKING_URI"))
+    logger.info(f"MLFLOW URI {os.getenv("MLFLOW_TRACKING_URI")}")
+    mlflow.set_experiment(os.getenv("MLFLOW_EXPERIMENT_NAME"))
     
     # Getting run_id for latest MLFlow run  
     runs = mlflow.search_runs(

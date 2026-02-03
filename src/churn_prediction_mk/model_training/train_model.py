@@ -9,6 +9,8 @@ import yaml
 from xgboost import XGBClassifier
 from pathlib import Path
 import mlflow
+from mlflow.tracking import MlflowClient
+
 
 logger = logging.getLogger("src.model_training.train_model")
 
@@ -80,19 +82,44 @@ def create_train_model(X_train_data: pd.DataFrame,
     base_dir = Path(__file__).resolve().parents[3]
     
     # Set up mlflow experiment
-    mlflow.set_tracking_uri(f"file://{base_dir}/mlruns")
-    mlflow.set_experiment("ml_classification")
+    logger.info(f"MLFLOW URI {os.getenv("MLFLOW_TRACKING_URI")}")
+    mlflow.set_experiment(os.getenv("MLFLOW_EXPERIMENT_NAME"))
     
-    # Set up xgboost autolog
-    mlflow.xgboost.autolog()
+    # Setting MLflow if we are running a DVC experiment
+    is_experiment = os.getenv("DVC_EXP_NAME") is not None
+    extra_args = {}
+    if is_experiment:
+        runs = mlflow.search_runs(
+            experiment_ids=[os.getenv("MLFLOW_EXPERIMENT_ID")],
+            filter_string="tags.dvc_exp = 'True'",
+            order_by=["start_time DESC"]
+        )
+        if runs.empty:
+            with mlflow.start_run() as parent_run:
+                mlflow.set_tag("dvc_exp", True)
+                parent_run_id = parent_run.info.run_id
+        else:
+            parent_run_id = runs.iloc[0].run_id
+        run_name = os.getenv("DVC_EXP_NAME")
+        extra_args = {
+            "parent_run_id":parent_run_id,
+            "run_name":run_name,
+            "nested": True
+        }    
     
-    with mlflow.start_run():
+    with mlflow.start_run(**extra_args) as run:
         # Log params to mlflow
         mlflow.log_params(params)
         
         # Log preprocessing artifacts
-        mlflow.log_artifact(base_dir / "artifacts/[features]_ohe.joblib")
-        mlflow.log_artifact(base_dir / "artifacts/[target]_label.joblib")
+        mlflow.log_artifact(
+            base_dir / "artifacts/[features]_ohe.joblib",
+            artifact_path="encoders"
+            )
+        mlflow.log_artifact(
+            base_dir / "artifacts/[target]_label.joblib",
+            artifact_path="encoders"
+            )
         
         # Creating the model
         model = XGBClassifier(
@@ -110,6 +137,17 @@ def create_train_model(X_train_data: pd.DataFrame,
                 eval_set=[(X_train_data, y_train_data), (X_test_data, y_test_data)]
                 )
         
+        
+        mlflow.xgboost.log_model(
+        model,
+        artifact_path="model"
+        )
+        
+        client = MlflowClient()
+        print("\n===== ARTIFACTS IN RUN =====")
+        for a in client.list_artifacts(run.info.run_id):
+            print(a.path, "(dir)" if a.is_dir else "")
+    
         # Saving training metrics 
         results = model.evals_result()
         
