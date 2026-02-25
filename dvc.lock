@@ -1,16 +1,16 @@
 schema: '2.0'
 stages:
   preprocess_data:
-    cmd: python -m src.churn_prediction_mk.data_preprocessing.preprocess_data
+    cmd: python -m src.data_preprocessing.preprocess_data
     deps:
     - path: data/raw/churn.csv
       hash: md5
       md5: ccb4f63215eebfc6a97421b93c3fe3a0
       size: 894592
-    - path: src/churn_prediction_mk/data_preprocessing/preprocess_data.py
+    - path: src/data_preprocessing/preprocess_data.py
       hash: md5
-      md5: 12dd67d5b7e83b355fc8f658391efc9d
-      size: 2940
+      md5: 7ceb88f5b8b0d58cbb036b088e95ae37
+      size: 2939
     params:
       params.yaml:
         preprocess_data.random_seed: 42
@@ -33,7 +33,7 @@ stages:
       md5: bb96c63dbc7b1056fd306265e978a69e
       size: 18403
   engineer_features:
-    cmd: python -m src.churn_prediction_mk.feature_engineering.engineer_features
+    cmd: python -m src.feature_engineering.engineer_features
     deps:
     - path: data/preprocessed/X_test.csv
       hash: md5
@@ -51,18 +51,18 @@ stages:
       hash: md5
       md5: bb96c63dbc7b1056fd306265e978a69e
       size: 18403
-    - path: src/churn_prediction_mk/feature_engineering/engineer_features.py
+    - path: src/feature_engineering/engineer_features.py
       hash: md5
       md5: 3e8295a5e08a26c8cfecfb97e1f29bbd
       size: 5255
     outs:
     - path: artifacts/[features]_ohe.joblib
       hash: md5
-      md5: 4e46afc7d1a054806f1eebfaa30d3601
+      md5: f0da8fd0f5f95a5ac2a31fad870150fc
       size: 6275
     - path: artifacts/[target]_label.joblib
       hash: md5
-      md5: f6089750efcfb527ca0b067c101cba55
+      md5: 683c75a5b838f6e7f8b32b980e73b730
       size: 484
     - path: data/processed/X_test_processed.csv
       hash: md5
@@ -81,7 +81,7 @@ stages:
       md5: c9b61327d9c9b8b3d1a988e0ba0d7f3d
       size: 11274
   train:
-    cmd: python -m src.churn_prediction_mk.model_training.train_model
+    cmd: python -m src.model_training.train_model
     deps:
     - path: data/processed/X_train_processed.csv
       hash: md5
@@ -91,10 +91,10 @@ stages:
       hash: md5
       md5: c9b61327d9c9b8b3d1a988e0ba0d7f3d
       size: 11274
-    - path: src/churn_prediction_mk/model_training/train_model.py
+    - path: src/model_training/train_model.py
       hash: md5
-      md5: f3d0ab19bc48cd591bb38af374f97a6a
-      size: 5713
+      md5: 55e6c3ca50fdd7ca7f08a3b725259bb2
+      size: 6159
     params:
       params.yaml:
         train.colsample_bytree: 1
@@ -108,14 +108,14 @@ stages:
       size: 248
     - path: models/model.xgboost
       hash: md5
-      md5: d6f7cd46ca5fca9cbd2f7dd19e98bc08
-      size: 312713
+      md5: f7acb89e9447928b6ed28eb3115e21ef
+      size: 312614
   evaluate:
-    cmd: python -m src.churn_prediction_mk.model_evaluation.evaluate_model
+    cmd: python -m src.model_evaluation.evaluate_model
     deps:
     - path: artifacts/[features]_ohe.joblib
       hash: md5
-      md5: 4e46afc7d1a054806f1eebfaa30d3601
+      md5: f0da8fd0f5f95a5ac2a31fad870150fc
       size: 6275
     - path: data/processed/X_test_processed.csv
       hash: md5
@@ -127,11 +127,11 @@ stages:
       size: 2824
     - path: models/model.xgboost
       hash: md5
-      md5: d6f7cd46ca5fca9cbd2f7dd19e98bc08
-      size: 312713
-    - path: src/churn_prediction_mk/model_evaluation/evaluate_model.py
+      md5: f7acb89e9447928b6ed28eb3115e21ef
+      size: 312614
+    - path: src/model_evaluation/evaluate_model.py
       hash: md5
-      md5: 364c707116abe87197df9daeb6415b48
+      md5: f3eaaa008c0967de465ee425d36fbe4d
       size: 3257
     outs:
     - path: metrics/evaluation.json

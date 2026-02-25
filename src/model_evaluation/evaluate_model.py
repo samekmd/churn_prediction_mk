@@ -56,7 +56,7 @@ def evaluate_model(
         X (pd.DataFrame): Test Features
         y_true (pd.Series): True Labels
     """
-    base_dir = Path(__file__).resolve().parents[3]
+    base_dir = Path(__file__).resolve().parents[2]
     
     # Set up mlflow experiment
     # mlflow.set_tracking_uri(f"file://{base_dir}/mlruns")

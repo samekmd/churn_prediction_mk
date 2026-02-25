@@ -1,0 +1,24 @@
+Metadata-Version: 2.4
+Name: churn_prediction_mk
+Version: 0.2.0
+Summary: Churn Prediction Machine Learning Project
+Author-email: samek_md <samuelalkmc@gmail.com>
+Requires-Python: <3.13,>=3.12
+Description-Content-Type: text/markdown
+Requires-Dist: notebook<8.0.0,>=7.5.0
+Requires-Dist: scikit-learn<2.0.0,>=1.7.2
+Requires-Dist: pandas<3.0.0,>=2.3.3
+Requires-Dist: numpy<3.0.0,>=2.3.5
+Requires-Dist: matplotlib<4.0.0,>=3.10.7
+Requires-Dist: seaborn<0.14.0,>=0.13.2
+Requires-Dist: plotly<7.0.0,>=6.5.0
+Requires-Dist: imbalanced-learn<0.15.0,>=0.14.0
+Requires-Dist: xgboost<4.0.0,>=3.1.3
+Requires-Dist: fastapi<0.129.0,>=0.128.0
+Requires-Dist: uvicorn<1.0.0,>=0.30.0
+Requires-Dist: python-dotenv<2.0.0,>=1.2.1
+Requires-Dist: mlflow<4.0.0,>=3.8.1
+Requires-Dist: dvc<4.0.0,>=3.66.1
+Requires-Dist: pyyaml<7.0.0,>=6.0.3
+Requires-Dist: dagshub==0.5.9
+Requires-Dist: python-multipart<0.0.23,>=0.0.22

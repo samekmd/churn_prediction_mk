@@ -7,7 +7,6 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 import numpy as np
 
-
 logger = logging.getLogger("src.data_preprocessing.preprocess_data")
 
 def load_data() -> pd.DataFrame:

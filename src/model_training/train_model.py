@@ -10,6 +10,7 @@ from xgboost import XGBClassifier
 from pathlib import Path
 import mlflow
 from mlflow.tracking import MlflowClient
+from .xgb_wrapper import XGBPipelineWrapper
 
 
 logger = logging.getLogger("src.model_training.train_model")
@@ -79,7 +80,7 @@ def create_train_model(X_train_data: pd.DataFrame,
     Returns:
         XGBClassifier: Model trained
     """
-    base_dir = Path(__file__).resolve().parents[3]
+    base_dir = Path(__file__).resolve().parents[2]
     
     # Set up mlflow experiment
     logger.info(f"MLFLOW URI {os.getenv("MLFLOW_TRACKING_URI")}")
@@ -112,14 +113,13 @@ def create_train_model(X_train_data: pd.DataFrame,
         mlflow.log_params(params)
         
         # Log preprocessing artifacts
-        mlflow.log_artifact(
-            base_dir / "artifacts/[features]_ohe.joblib",
-            artifact_path="encoders"
-            )
-        mlflow.log_artifact(
-            base_dir / "artifacts/[target]_label.joblib",
-            artifact_path="encoders"
-            )
+        target_encoder_path = base_dir / "artifacts/[target]_label.joblib"
+        target_encoder = joblib.load(target_encoder_path)
+        
+        features_encoder_path = base_dir / "artifacts/[features]_ohe.joblib"
+        features_encoder = joblib.load(features_encoder_path)
+        
+        
         
         # Creating the model
         model = XGBClassifier(
@@ -137,11 +137,24 @@ def create_train_model(X_train_data: pd.DataFrame,
                 eval_set=[(X_train_data, y_train_data), (X_test_data, y_test_data)]
                 )
         
-        
-        mlflow.xgboost.log_model(
-        model,
-        artifact_path="model"
+        wrapper = XGBPipelineWrapper(
+            model=model,
+            features_encoder=features_encoder,
+            target_encoder=target_encoder
         )
+        
+       
+        mlflow.pyfunc.log_model(
+            python_model=wrapper,
+            artifact_path="model",
+            pip_requirements=[
+                "mlflow",
+                "xgboost",
+                "scikit-learn",
+                "cloudpickle"
+            ]
+        )
+       
         
         client = MlflowClient()
         print("\n===== ARTIFACTS IN RUN =====")
@@ -161,15 +174,16 @@ def create_train_model(X_train_data: pd.DataFrame,
             'n_estimators_used': len(results['validation_0']['logloss'])
         }
         
+        mlflow.log_metrics(metrics)
         
         metrics_path = base_dir / "metrics/training.json"
         
         with open(metrics_path, 'w') as f:
             json.dump(metrics, f, indent=2)
         
-        # Saving the model
         save_training_artifacts(model)
-    
+
+            
     
     
 def main():

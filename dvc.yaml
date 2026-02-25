@@ -5,9 +5,9 @@ stages:
   #     - data/raw/raw.csv
 
   preprocess_data:
-    cmd: python -m src.churn_prediction_mk.data_preprocessing.preprocess_data
+    cmd: python -m src.data_preprocessing.preprocess_data
     deps:
-      - src/churn_prediction_mk/data_preprocessing/preprocess_data.py
+      - src/data_preprocessing/preprocess_data.py
       - data/raw/churn.csv
     outs:
       - data/preprocessed/X_test.csv
@@ -19,9 +19,9 @@ stages:
       - preprocess_data.random_seed
 
   engineer_features:
-    cmd: python -m src.churn_prediction_mk.feature_engineering.engineer_features
+    cmd: python -m src.feature_engineering.engineer_features
     deps:
-      - src/churn_prediction_mk/feature_engineering/engineer_features.py
+      - src/feature_engineering/engineer_features.py
       - data/preprocessed/X_test.csv
       - data/preprocessed/X_train.csv
       - data/preprocessed/y_test.csv
@@ -36,9 +36,9 @@ stages:
       
 
   train:
-    cmd: python -m src.churn_prediction_mk.model_training.train_model
+    cmd: python -m src.model_training.train_model
     deps:
-      - src/churn_prediction_mk/model_training/train_model.py
+      - src/model_training/train_model.py
       - data/processed/X_train_processed.csv
       - data/processed/y_train_processed.csv
     outs:
@@ -52,9 +52,9 @@ stages:
       - train.n_estimators
 
   evaluate:
-    cmd: python -m src.churn_prediction_mk.model_evaluation.evaluate_model
+    cmd: python -m src.model_evaluation.evaluate_model
     deps:
-      - src/churn_prediction_mk/model_evaluation/evaluate_model.py
+      - src/model_evaluation/evaluate_model.py
       - models/model.xgboost
       - artifacts/[features]_ohe.joblib
       - data/processed/X_test_processed.csv
